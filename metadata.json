@@ -1,0 +1,6 @@
+{
+  "name": "EvalGuard AI",
+  "description": "Enterprise LLM Evaluation, Benchmarking, Hallucination Detection & Red-Teaming Intelligence Platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

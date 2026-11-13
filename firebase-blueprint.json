@@ -1,0 +1,314 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user account and organization profile.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "organization": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "displayName", "organization", "createdAt"]
+    },
+    "EvaluationRun": {
+      "title": "EvaluationRun",
+      "description": "Stored LLM evaluation or multi-model benchmark run with aggregated and item-level metrics.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "datasetName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "modelNames": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "sampleCount": {
+          "type": "number"
+        },
+        "overallScore": {
+          "type": "number"
+        },
+        "accuracy": {
+          "type": "number"
+        },
+        "faithfulness": {
+          "type": "number"
+        },
+        "relevance": {
+          "type": "number"
+        },
+        "completeness": {
+          "type": "number"
+        },
+        "hallucinationRate": {
+          "type": "number"
+        },
+        "safetyPassRate": {
+          "type": "number"
+        },
+        "avgLatencyMs": {
+          "type": "number"
+        },
+        "isSimulated": {
+          "type": "boolean"
+        },
+        "detailsJson": {
+          "type": "string",
+          "maxLength": 250000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "datasetName",
+        "modelNames",
+        "sampleCount",
+        "overallScore",
+        "accuracy",
+        "faithfulness",
+        "relevance",
+        "completeness",
+        "hallucinationRate",
+        "safetyPassRate",
+        "avgLatencyMs",
+        "isSimulated",
+        "detailsJson",
+        "createdAt"
+      ]
+    },
+    "HallucinationAnalysis": {
+      "title": "HallucinationAnalysis",
+      "description": "Document-grounded claim extraction and verification record.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "modelName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "overallFaithfulness": {
+          "type": "number"
+        },
+        "supportedCount": {
+          "type": "number"
+        },
+        "unsupportedCount": {
+          "type": "number"
+        },
+        "contradictoryCount": {
+          "type": "number"
+        },
+        "isSimulated": {
+          "type": "boolean"
+        },
+        "claimsPayload": {
+          "type": "string",
+          "maxLength": 150000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "title",
+        "modelName",
+        "overallFaithfulness",
+        "supportedCount",
+        "unsupportedCount",
+        "contradictoryCount",
+        "isSimulated",
+        "claimsPayload",
+        "createdAt"
+      ]
+    },
+    "RedTeamCampaign": {
+      "title": "RedTeamCampaign",
+      "description": "Adversarial red-teaming suite execution and vulnerability findings.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "campaignName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "modelName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "totalTests": {
+          "type": "number"
+        },
+        "passedCount": {
+          "type": "number"
+        },
+        "failedCount": {
+          "type": "number"
+        },
+        "reviewCount": {
+          "type": "number"
+        },
+        "passRate": {
+          "type": "number"
+        },
+        "isSimulated": {
+          "type": "boolean"
+        },
+        "findingsPayload": {
+          "type": "string",
+          "maxLength": 200000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "campaignName",
+        "modelName",
+        "totalTests",
+        "passedCount",
+        "failedCount",
+        "reviewCount",
+        "passRate",
+        "isSimulated",
+        "findingsPayload",
+        "createdAt"
+      ]
+    },
+    "DatasetRecord": {
+      "title": "DatasetRecord",
+      "description": "Uploaded or curated benchmark dataset metadata and schema quality audit.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "recordCount": {
+          "type": "number"
+        },
+        "duplicateCount": {
+          "type": "number"
+        },
+        "missingValueCount": {
+          "type": "number"
+        },
+        "trainCount": {
+          "type": "number"
+        },
+        "evalCount": {
+          "type": "number"
+        },
+        "samplePayload": {
+          "type": "string",
+          "maxLength": 250000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "category",
+        "recordCount",
+        "duplicateCount",
+        "missingValueCount",
+        "trainCount",
+        "evalCount",
+        "samplePayload",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles strictly isolated by owner UID."
+    },
+    "/evaluationRuns/{runId}": {
+      "schema": { "$ref": "#/entities/EvaluationRun" },
+      "description": "Evaluation and benchmark runs owned by the user."
+    },
+    "/hallucinationAnalyses/{analysisId}": {
+      "schema": { "$ref": "#/entities/HallucinationAnalysis" },
+      "description": "Document-grounded hallucination detection runs owned by the user."
+    },
+    "/redTeamCampaigns/{campaignId}": {
+      "schema": { "$ref": "#/entities/RedTeamCampaign" },
+      "description": "Adversarial red-teaming test campaigns owned by the user."
+    },
+    "/datasets/{datasetId}": {
+      "schema": { "$ref": "#/entities/DatasetRecord" },
+      "description": "Evaluation datasets and quality validation records owned by the user."
+    }
+  }
+}

@@ -1,0 +1,209 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Hardened Primitives
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity Blueprint Validators
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'organization', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'organization', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.uid == request.auth.uid &&
+        data.uid == userId &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 256 &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+        data.organization is string && data.organization.size() >= 1 && data.organization.size() <= 120 &&
+        data.createdAt is string && data.createdAt.size() >= 10 && data.createdAt.size() <= 64;
+    }
+
+    function isValidEvaluationRun(data) {
+      return data.keys().hasAll([
+          'ownerId', 'name', 'datasetName', 'modelNames', 'sampleCount',
+          'overallScore', 'accuracy', 'faithfulness', 'relevance', 'completeness',
+          'hallucinationRate', 'safetyPassRate', 'avgLatencyMs', 'isSimulated',
+          'detailsJson', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId', 'name', 'datasetName', 'modelNames', 'sampleCount',
+          'overallScore', 'accuracy', 'faithfulness', 'relevance', 'completeness',
+          'hallucinationRate', 'safetyPassRate', 'avgLatencyMs', 'isSimulated',
+          'detailsJson', 'createdAt'
+        ]) &&
+        data.ownerId is string && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 160 &&
+        data.datasetName is string && data.datasetName.size() >= 1 && data.datasetName.size() <= 160 &&
+        data.modelNames is string && data.modelNames.size() >= 1 && data.modelNames.size() <= 500 &&
+        data.sampleCount is number && data.sampleCount >= 1 && data.sampleCount <= 10000 &&
+        data.overallScore is number && data.overallScore >= 0 && data.overallScore <= 100 &&
+        data.accuracy is number && data.accuracy >= 0 && data.accuracy <= 100 &&
+        data.faithfulness is number && data.faithfulness >= 0 && data.faithfulness <= 100 &&
+        data.relevance is number && data.relevance >= 0 && data.relevance <= 100 &&
+        data.completeness is number && data.completeness >= 0 && data.completeness <= 100 &&
+        data.hallucinationRate is number && data.hallucinationRate >= 0 && data.hallucinationRate <= 100 &&
+        data.safetyPassRate is number && data.safetyPassRate >= 0 && data.safetyPassRate <= 100 &&
+        data.avgLatencyMs is number && data.avgLatencyMs >= 0 && data.avgLatencyMs <= 600000 &&
+        data.isSimulated is bool &&
+        data.detailsJson is string && data.detailsJson.size() >= 2 && data.detailsJson.size() <= 250000 &&
+        data.createdAt is string && data.createdAt.size() >= 10 && data.createdAt.size() <= 64;
+    }
+
+    function isValidHallucinationAnalysis(data) {
+      return data.keys().hasAll([
+          'ownerId', 'title', 'modelName', 'overallFaithfulness',
+          'supportedCount', 'unsupportedCount', 'contradictoryCount',
+          'isSimulated', 'claimsPayload', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId', 'title', 'modelName', 'overallFaithfulness',
+          'supportedCount', 'unsupportedCount', 'contradictoryCount',
+          'isSimulated', 'claimsPayload', 'createdAt'
+        ]) &&
+        data.ownerId is string && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 160 &&
+        data.modelName is string && data.modelName.size() >= 1 && data.modelName.size() <= 120 &&
+        data.overallFaithfulness is number && data.overallFaithfulness >= 0 && data.overallFaithfulness <= 100 &&
+        data.supportedCount is number && data.supportedCount >= 0 && data.supportedCount <= 1000 &&
+        data.unsupportedCount is number && data.unsupportedCount >= 0 && data.unsupportedCount <= 1000 &&
+        data.contradictoryCount is number && data.contradictoryCount >= 0 && data.contradictoryCount <= 1000 &&
+        data.isSimulated is bool &&
+        data.claimsPayload is string && data.claimsPayload.size() >= 2 && data.claimsPayload.size() <= 150000 &&
+        data.createdAt is string && data.createdAt.size() >= 10 && data.createdAt.size() <= 64;
+    }
+
+    function isValidRedTeamCampaign(data) {
+      return data.keys().hasAll([
+          'ownerId', 'campaignName', 'modelName', 'totalTests',
+          'passedCount', 'failedCount', 'reviewCount', 'passRate',
+          'isSimulated', 'findingsPayload', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId', 'campaignName', 'modelName', 'totalTests',
+          'passedCount', 'failedCount', 'reviewCount', 'passRate',
+          'isSimulated', 'findingsPayload', 'createdAt'
+        ]) &&
+        data.ownerId is string && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.campaignName is string && data.campaignName.size() >= 1 && data.campaignName.size() <= 160 &&
+        data.modelName is string && data.modelName.size() >= 1 && data.modelName.size() <= 120 &&
+        data.totalTests is number && data.totalTests >= 1 && data.totalTests <= 1000 &&
+        data.passedCount is number && data.passedCount >= 0 && data.passedCount <= 1000 &&
+        data.failedCount is number && data.failedCount >= 0 && data.failedCount <= 1000 &&
+        data.reviewCount is number && data.reviewCount >= 0 && data.reviewCount <= 1000 &&
+        data.passRate is number && data.passRate >= 0 && data.passRate <= 100 &&
+        data.isSimulated is bool &&
+        data.findingsPayload is string && data.findingsPayload.size() >= 2 && data.findingsPayload.size() <= 200000 &&
+        data.createdAt is string && data.createdAt.size() >= 10 && data.createdAt.size() <= 64;
+    }
+
+    function isValidDatasetRecord(data) {
+      return data.keys().hasAll([
+          'ownerId', 'name', 'category', 'recordCount',
+          'duplicateCount', 'missingValueCount', 'trainCount',
+          'evalCount', 'samplePayload', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId', 'name', 'category', 'recordCount',
+          'duplicateCount', 'missingValueCount', 'trainCount',
+          'evalCount', 'samplePayload', 'createdAt'
+        ]) &&
+        data.ownerId is string && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 160 &&
+        data.category is string && data.category.size() >= 1 && data.category.size() <= 80 &&
+        data.recordCount is number && data.recordCount >= 0 && data.recordCount <= 100000 &&
+        data.duplicateCount is number && data.duplicateCount >= 0 && data.duplicateCount <= 100000 &&
+        data.missingValueCount is number && data.missingValueCount >= 0 && data.missingValueCount <= 100000 &&
+        data.trainCount is number && data.trainCount >= 0 && data.trainCount <= 100000 &&
+        data.evalCount is number && data.evalCount >= 0 && data.evalCount <= 100000 &&
+        data.samplePayload is string && data.samplePayload.size() >= 2 && data.samplePayload.size() <= 250000 &&
+        data.createdAt is string && data.createdAt.size() >= 10 && data.createdAt.size() <= 64;
+    }
+
+    // Collection Rules
+    match /test/connection {
+      allow get: if isSignedIn();
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && existing().uid == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isSignedIn() && isValidId(userId) && isValidUserProfile(incoming(), userId) &&
+        existing().uid == request.auth.uid &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'organization', 'email']);
+      allow delete: if isSignedIn() && isValidId(userId) && existing().uid == request.auth.uid;
+    }
+
+    match /evaluationRuns/{runId} {
+      allow get: if isSignedIn() && isValidId(runId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(runId) && isValidEvaluationRun(incoming());
+      allow update: if isSignedIn() && isValidId(runId) && isValidEvaluationRun(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'detailsJson']);
+      allow delete: if isSignedIn() && isValidId(runId) && existing().ownerId == request.auth.uid;
+    }
+
+    match /hallucinationAnalyses/{analysisId} {
+      allow get: if isSignedIn() && isValidId(analysisId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(analysisId) && isValidHallucinationAnalysis(incoming());
+      allow update: if isSignedIn() && isValidId(analysisId) && isValidHallucinationAnalysis(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['title']);
+      allow delete: if isSignedIn() && isValidId(analysisId) && existing().ownerId == request.auth.uid;
+    }
+
+    match /redTeamCampaigns/{campaignId} {
+      allow get: if isSignedIn() && isValidId(campaignId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(campaignId) && isValidRedTeamCampaign(incoming());
+      allow update: if isSignedIn() && isValidId(campaignId) && isValidRedTeamCampaign(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['campaignName']);
+      allow delete: if isSignedIn() && isValidId(campaignId) && existing().ownerId == request.auth.uid;
+    }
+
+    match /datasets/{datasetId} {
+      allow get: if isSignedIn() && isValidId(datasetId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(datasetId) && isValidDatasetRecord(incoming());
+      allow update: if isSignedIn() && isValidId(datasetId) && isValidDatasetRecord(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'category', 'trainCount', 'evalCount', 'samplePayload']);
+      allow delete: if isSignedIn() && isValidId(datasetId) && existing().ownerId == request.auth.uid;
+    }
+  }
+}
