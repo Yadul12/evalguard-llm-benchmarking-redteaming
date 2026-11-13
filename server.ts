@@ -1,14 +1,14 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { createServer as createViteServer } from 'vite';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 
 dotenv.config();
 
-const app = express();
-const PORT = 3000;
+export const app = express();
+const PORT = Number(process.env.PORT) || 3000;
 
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '10mb' }));
 
 // Simple in-memory rate limiter per IP for API protection
@@ -189,6 +189,7 @@ Model Response: ${modelResponse}`,
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -207,4 +208,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
